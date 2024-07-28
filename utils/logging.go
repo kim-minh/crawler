@@ -13,11 +13,11 @@ func LogComplete(err error, data string) {
 	}
 }
 
-func LogFetchError(res *http.Response, err error, url string) {
+func LogFetchError(res *http.Response, err error) {
 	if err != nil {
-		log.Printf("Can't fetch %s. Error: %s", url, err)
+		log.Printf("Can't fetch %s. Error: %s", res.Request.URL, err)
 	} else if res.StatusCode != http.StatusOK {
-		log.Printf("Request failed with %s", res.Status)
+		log.Printf("Request %s failed with %s", res.Request.URL.Path, res.Status)
 	}
 }
 

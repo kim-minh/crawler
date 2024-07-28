@@ -4,8 +4,8 @@ import (
 	"crawler/utils"
 )
 
-func ListCompanies() (company, int) {
+func ListCompanies() (company, error) {
 	url := "https://wifeed.vn/api/thong-tin-co-phieu/danh-sach-ma-chung-khoan"
-	data, status := utils.Fetch[company](url)
-	return data, status
+	data, err := utils.Fetch[company](url)
+	return data, err
 }

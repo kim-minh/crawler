@@ -6,10 +6,9 @@ import (
 	"net/http"
 )
 
-func Fetch[T any](url string) (T, int) {
+func Fetch[T any](url string) (T, error) {
 	res, err := http.Get(url)
-
-	LogFetchError(res, err, url)
+	LogFetchError(res, err)
 
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
@@ -19,5 +18,5 @@ func Fetch[T any](url string) (T, int) {
 	err = json.Unmarshal(body, &data)
 	LogJsonError(err)
 
-	return data, res.StatusCode
+	return data, err
 }
