@@ -1,11 +1,12 @@
 package utils
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 )
 
-func Fetch(url string) ([]byte, int) {
+func Fetch[T any](url string) (T, int) {
 	res, err := http.Get(url)
 
 	LogFetchError(res, err, url)
@@ -14,5 +15,9 @@ func Fetch(url string) ([]byte, int) {
 	body, err := io.ReadAll(res.Body)
 	LogRequestBodyError(err)
 
-	return body, res.StatusCode
+	var data T
+	err = json.Unmarshal(body, &data)
+	LogJsonError(err)
+
+	return data, res.StatusCode
 }
