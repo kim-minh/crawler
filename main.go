@@ -12,4 +12,5 @@ func main() {
 
 	script.UpdateCompanies(queries)
 	defer script.UpdateOverview(queries)
+	defer script.UpdateProfile(queries)
 }

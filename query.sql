@@ -53,5 +53,26 @@ industry,
 industry_en,
 short_name,
 website
-) = ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
-;
+) = ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19);
+
+-- name: CreateProfile :exec
+INSERT INTO profile (
+company_id,
+business_risk,
+business_strategies,
+company_name,
+history_dev,
+key_developments,
+profile,
+promise
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+ON CONFLICT (company_id) DO UPDATE
+SET (
+business_risk,
+business_strategies,
+company_name,
+history_dev,
+key_developments,
+profile,
+promise
+) = ($2, $3, $4, $5, $6, $7, $8);

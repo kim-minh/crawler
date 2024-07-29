@@ -50,3 +50,28 @@ func UpdateOverview(queries *db.Queries) {
 
 	defer utils.LogComplete(err, "overview")
 }
+
+func UpdateProfile(queries *db.Queries) {
+	ctx := context.Background()
+
+	var err error
+	updateEach(queries, func(company db.Company) {
+		profile, err := stfetch.FetchProfile(company.Ticker)
+		if err != nil {
+			return
+		}
+
+		err = queries.CreateProfile(ctx, db.CreateProfileParams{
+			CompanyID:          pgtype.Int4{Int32: company.ID, Valid: true},
+			BusinessRisk:       utils.ExtractText(profile.BusinessRisk),
+			BusinessStrategies: utils.ExtractText(profile.BusinessStrategies),
+			CompanyName:        profile.CompanyName,
+			HistoryDev:         utils.ExtractText(profile.HistoryDev),
+			KeyDevelopments:    utils.ExtractText(profile.KeyDevelopments),
+			Profile:            utils.ExtractText(profile.CompanyProfile),
+			Promise:            utils.ExtractText(profile.CompanyPromise),
+		})
+	})
+
+	defer utils.LogComplete(err, "profile")
+}

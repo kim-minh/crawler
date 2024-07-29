@@ -131,6 +131,54 @@ func (q *Queries) CreateOverview(ctx context.Context, arg CreateOverviewParams) 
 	return err
 }
 
+const createProfile = `-- name: CreateProfile :exec
+INSERT INTO profile (
+company_id,
+business_risk,
+business_strategies,
+company_name,
+history_dev,
+key_developments,
+profile,
+promise
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+ON CONFLICT (company_id) DO UPDATE
+SET (
+business_risk,
+business_strategies,
+company_name,
+history_dev,
+key_developments,
+profile,
+promise
+) = ($2, $3, $4, $5, $6, $7, $8)
+`
+
+type CreateProfileParams struct {
+	CompanyID          pgtype.Int4
+	BusinessRisk       pgtype.Text
+	BusinessStrategies pgtype.Text
+	CompanyName        pgtype.Text
+	HistoryDev         pgtype.Text
+	KeyDevelopments    pgtype.Text
+	Profile            pgtype.Text
+	Promise            pgtype.Text
+}
+
+func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) error {
+	_, err := q.db.Exec(ctx, createProfile,
+		arg.CompanyID,
+		arg.BusinessRisk,
+		arg.BusinessStrategies,
+		arg.CompanyName,
+		arg.HistoryDev,
+		arg.KeyDevelopments,
+		arg.Profile,
+		arg.Promise,
+	)
+	return err
+}
+
 const listCompanies = `-- name: ListCompanies :many
 SELECT id, fullname_vi, company_type, exchange, ticker FROM companies
 `
