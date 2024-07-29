@@ -13,7 +13,7 @@ const (
 	waitTime      = 30 * time.Second
 )
 
-func updateEach(queries *db.Queries, update func(c db.Company)) {
+func updateEach(queries *db.Queries, update func(company db.Company)) {
 	ctx := context.Background()
 
 	companies, err := queries.ListCompanies(ctx)
