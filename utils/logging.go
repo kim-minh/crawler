@@ -5,11 +5,11 @@ import (
 	"net/http"
 )
 
-func LogComplete(err error, data string) {
+func LogComplete(err error, dataType string) {
 	if err == nil {
-		log.Printf("Update %s data sucessfully", data)
+		log.Printf("Update %s data sucessfully", dataType)
 	} else {
-		log.Printf("Failed to update %s data", data)
+		log.Printf("Failed to update %s data. Error: %s", dataType, err)
 	}
 }
 
@@ -36,5 +36,11 @@ func LogJsonError(err error) {
 func LogError(err error) {
 	if err != nil {
 		log.Printf("Error: %s", err)
+	}
+}
+
+func LogFatal(err error) {
+	if err != nil {
+		log.Fatalf("Exited. Fatal error: %s", err)
 	}
 }

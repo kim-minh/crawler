@@ -13,14 +13,17 @@ import (
 func UpdateOverview(queries *db.Queries) {
 	ctx := context.Background()
 
-	update := func(company db.Company) {
-		overview, err := stfetch.FetchOverview(company.Ticker)
-		if err != nil {
+	var err error
+	updateEach(queries, func(company db.Company) {
+		overview, fetchErr := stfetch.FetchOverview(company.Ticker)
+		if fetchErr != nil {
 			return
 		}
 
-		establishedYear, err := strconv.Atoi(overview.EstablishedYear.String)
-		industryIDV2, err := strconv.Atoi(overview.IndustryIDv2.String)
+		establishedYear, atoiErr := strconv.Atoi(overview.EstablishedYear.String)
+		utils.LogError(atoiErr)
+		industryIDV2, atoiErr := strconv.Atoi(overview.IndustryIDv2.String)
+		utils.LogError(atoiErr)
 
 		err = queries.CreateOverview(ctx, db.CreateOverviewParams{
 			CompanyID:            pgtype.Int4{Int32: company.ID, Valid: true},
@@ -43,9 +46,7 @@ func UpdateOverview(queries *db.Queries) {
 			ShortName:            overview.ShortName,
 			Website:              overview.Website,
 		})
+	})
 
-		utils.LogError(err)
-	}
-
-	updateEach(queries, update)
+	defer utils.LogComplete(err, "overview")
 }

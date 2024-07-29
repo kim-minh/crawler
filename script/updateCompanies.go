@@ -10,18 +10,15 @@ import (
 func UpdateCompanies(queries *db.Queries) {
 	ctx := context.Background()
 
-	companies, _ := stfetch.ListCompanies()
+	companies, _ := stfetch.FetchCompanies()
+	var err error
 	for _, company := range companies.Data {
-		err := queries.CreateCompany(ctx, db.CreateCompanyParams{
+		err = queries.CreateCompany(ctx, db.CreateCompanyParams{
 			Ticker:      company.Ticker.String,
 			FullnameVi:  company.FullnameVi,
 			CompanyType: company.CompanyType,
 			Exchange:    company.Exchange,
 		})
-
-		if err != nil {
-			utils.LogError(err)
-		}
-		defer utils.LogComplete(err, "companies")
 	}
+	defer utils.LogComplete(err, "companies")
 }
