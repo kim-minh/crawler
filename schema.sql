@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS profile
 
 CREATE TABLE IF NOT EXISTS large_shareholders
 (
-    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    id INTEGER PRIMARY KEY,
     company_id INTEGER,
     share_own_percent REAL,
     shareholder TEXT
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS subsidiaries
 
 CREATE TABLE IF NOT EXISTS officers
 (
-    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    id INTEGER PRIMARY KEY,
     company_id INTEGER,
     own_percent REAL,
     name TEXT,
@@ -299,31 +299,18 @@ CREATE TABLE IF NOT EXISTS stock_intraday
     time TIMESTAMPTZ
 );
 
--- CREATE TABLE IF NOT EXISTS stock_indices
--- (
---     id serial NOT NULL,
---     index_name text,
---     CONSTRAINT stock_indices_pkey PRIMARY KEY (id)
--- );
+CREATE TABLE IF NOT EXISTS stock_indices
+(
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    index_name text
+);
 
--- CREATE TABLE IF NOT EXISTS stock_indices_companies
--- (
---     companies_id INTEGER NOT NULL,
---     stock_indices_id INTEGER NOT NULL,
---     CONSTRAINT stock_indices_companies_pkey PRIMARY KEY (companies_id, stock_indices_id)
--- );
-
--- CREATE TABLE IF NOT EXISTS ticker_price_volatility
--- (
---     company_id INTEGER,
---     id serial NOT NULL,
---     ticker_highest_price text,
---     ticker_highest_price_percent text,
---     ticker_lowest_price text,
---     ticker_lowest_price_percent text,
---     CONSTRAINT ticker_price_volatility_pkey PRIMARY KEY (id),
---     CONSTRAINT ticker_price_volatility_company_id_key UNIQUE (company_id)
--- );
+CREATE TABLE IF NOT EXISTS stock_indices_companies
+(
+    companies_id INTEGER NOT NULL,
+    stock_indices_id INTEGER NOT NULL,
+    CONSTRAINT stock_indices_companies_pkey PRIMARY KEY (companies_id, stock_indices_id)
+);
 
 ALTER TABLE IF EXISTS overview
     ADD CONSTRAINT fkkke2ivq536ntcq3uf971cinvs FOREIGN KEY (company_id)
@@ -427,23 +414,16 @@ ALTER TABLE IF EXISTS stock_intraday
     ON DELETE NO ACTION;
 
 
--- ALTER TABLE IF EXISTS stock_indices_companies
---     ADD CONSTRAINT fkd8347mlarhi4cdjkp96rpx1vv FOREIGN KEY (stock_indices_id)
---     REFERENCES stock_indices (id) MATCH SIMPLE
---     ON UPDATE NO ACTION
---     ON DELETE NO ACTION;
+ALTER TABLE IF EXISTS stock_indices_companies
+    ADD CONSTRAINT fkd8347mlarhi4cdjkp96rpx1vv FOREIGN KEY (stock_indices_id)
+    REFERENCES stock_indices (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
 
 
--- ALTER TABLE IF EXISTS stock_indices_companies
---     ADD CONSTRAINT fktbbkx4xhvomfm71ku7xtc5nn2 FOREIGN KEY (companies_id)
---     REFERENCES companies (id) MATCH SIMPLE
---     ON UPDATE NO ACTION
---     ON DELETE NO ACTION;
--- ALTER TABLE IF EXISTS ticker_price_volatility
---     ADD CONSTRAINT fke9rka887uybq1amwjfdhugc3v FOREIGN KEY (company_id)
---     REFERENCES companies (id) MATCH SIMPLE
---     ON UPDATE NO ACTION
---     ON DELETE NO ACTION;
--- CREATE INDEX IF NOT EXISTS ticker_price_volatility_company_id_key
---     ON ticker_price_volatility(company_id);
+ALTER TABLE IF EXISTS stock_indices_companies
+    ADD CONSTRAINT fktbbkx4xhvomfm71ku7xtc5nn2 FOREIGN KEY (companies_id)
+    REFERENCES companies (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
 END;

@@ -273,6 +273,16 @@ type StockHistorical struct {
 	Time      pgtype.Timestamptz
 }
 
+type StockIndex struct {
+	ID        int32
+	IndexName pgtype.Text
+}
+
+type StockIndicesCompany struct {
+	CompaniesID    int32
+	StockIndicesID int32
+}
+
 type StockIntraday struct {
 	ID                  int32
 	CompanyID           pgtype.Int4
