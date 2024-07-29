@@ -10,6 +10,6 @@ func main() {
 	queries := db.New(pool)
 	defer pool.Close()
 
-	// script.UpdateCompanies(queries)
-	script.UpdateOverview(queries)
+	script.UpdateCompanies(queries)
+	defer script.UpdateOverview(queries)
 }
