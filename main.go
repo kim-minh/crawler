@@ -3,10 +3,11 @@ package main
 import (
 	"crawler/db"
 	"crawler/script"
+	"crawler/utils"
 )
 
 func main() {
-	pool := script.Connect()
+	pool := utils.ConnectDB()
 	queries := db.New(pool)
 	defer pool.Close()
 

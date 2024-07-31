@@ -1,4 +1,4 @@
-package script
+package utils
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func Connect() *pgxpool.Pool {
+func ConnectDB() *pgxpool.Pool {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")

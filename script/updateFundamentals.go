@@ -14,6 +14,8 @@ func UpdateOverview(queries *db.Queries) {
 	ctx := context.Background()
 
 	var err error
+	defer utils.LogComplete(err, "overview")
+
 	updateEach(queries, func(company db.Company) {
 		overview, fetchErr := stfetch.FetchOverview(company.Ticker)
 		if fetchErr != nil {
@@ -50,14 +52,14 @@ func UpdateOverview(queries *db.Queries) {
 			Website:              overview.Website,
 		})
 	})
-
-	defer utils.LogComplete(err, "overview")
 }
 
 func UpdateProfile(queries *db.Queries) {
 	ctx := context.Background()
 
 	var err error
+	defer utils.LogComplete(err, "profile")
+
 	updateEach(queries, func(company db.Company) {
 		profile, fetchErr := stfetch.FetchProfile(company.Ticker)
 		if fetchErr != nil {
@@ -75,14 +77,14 @@ func UpdateProfile(queries *db.Queries) {
 			Promise:            utils.ExtractText(profile.CompanyPromise),
 		})
 	})
-
-	defer utils.LogComplete(err, "profile")
 }
 
 func UpdateShareholders(queries *db.Queries) {
 	ctx := context.Background()
 
 	var err error
+	defer utils.LogComplete(err, "shareholders")
+
 	updateEach(queries, func(company db.Company) {
 		shareholders, fetchErr := stfetch.FetchShareholders(company.Ticker)
 		if fetchErr != nil {
@@ -98,7 +100,6 @@ func UpdateShareholders(queries *db.Queries) {
 			})
 		}
 	})
-	utils.LogComplete(err, "shareholders")
 }
 
 func UpdateInsiderDeals(queries *db.Queries) {
@@ -115,6 +116,8 @@ func UpdateInsiderDeals(queries *db.Queries) {
 	}
 
 	var err error
+	defer utils.LogComplete(err, "insider deals")
+
 	updateEach(queries, func(company db.Company) {
 		insiderDeals, fetchErr := stfetch.FetchInsiderDeals(company.Ticker)
 		if fetchErr != nil {
@@ -139,5 +142,4 @@ func UpdateInsiderDeals(queries *db.Queries) {
 			})
 		}
 	})
-	utils.LogComplete(err, "insider deals")
 }

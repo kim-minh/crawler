@@ -12,6 +12,8 @@ func UpdateCompanies(queries *db.Queries) {
 
 	companies, _ := stfetch.FetchCompanies()
 	var err error
+	defer utils.LogComplete(err, "companies")
+
 	for _, company := range companies.Data {
 		err = queries.CreateCompany(ctx, db.CreateCompanyParams{
 			Ticker:      company.Ticker.String,
@@ -20,5 +22,4 @@ func UpdateCompanies(queries *db.Queries) {
 			Exchange:    company.Exchange,
 		})
 	}
-	defer utils.LogComplete(err, "companies")
 }
