@@ -38,7 +38,7 @@ func (q *Queries) CreateCompany(ctx context.Context, arg CreateCompanyParams) er
 	return err
 }
 
-const createInsiderDeals = `-- name: CreateInsiderDeals :exec
+const createInsiderDeal = `-- name: CreateInsiderDeal :exec
 INSERT INTO insider_deals (
     company_id,
     deal_price,
@@ -50,7 +50,7 @@ INSERT INTO insider_deals (
 ) VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
-type CreateInsiderDealsParams struct {
+type CreateInsiderDealParams struct {
 	CompanyID        int32
 	DealPrice        pgtype.Int4
 	DealQuantity     pgtype.Int4
@@ -60,8 +60,8 @@ type CreateInsiderDealsParams struct {
 	DealMethod       pgtype.Text
 }
 
-func (q *Queries) CreateInsiderDeals(ctx context.Context, arg CreateInsiderDealsParams) error {
-	_, err := q.db.Exec(ctx, createInsiderDeals,
+func (q *Queries) CreateInsiderDeal(ctx context.Context, arg CreateInsiderDealParams) error {
+	_, err := q.db.Exec(ctx, createInsiderDeal,
 		arg.CompanyID,
 		arg.DealPrice,
 		arg.DealQuantity,
@@ -69,6 +69,41 @@ func (q *Queries) CreateInsiderDeals(ctx context.Context, arg CreateInsiderDeals
 		arg.DealAnnounceDate,
 		arg.DealAction,
 		arg.DealMethod,
+	)
+	return err
+}
+
+const createOfficer = `-- name: CreateOfficer :exec
+INSERT INTO officers (
+    no,
+    company_id,
+    own_percent,
+    name,
+    position
+) VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (no, company_id) DO UPDATE
+SET (
+own_percent,
+    name,
+    position
+) = ($3, $4, $5)
+`
+
+type CreateOfficerParams struct {
+	No         int32
+	CompanyID  int32
+	OwnPercent pgtype.Float4
+	Name       pgtype.Text
+	Position   pgtype.Text
+}
+
+func (q *Queries) CreateOfficer(ctx context.Context, arg CreateOfficerParams) error {
+	_, err := q.db.Exec(ctx, createOfficer,
+		arg.No,
+		arg.CompanyID,
+		arg.OwnPercent,
+		arg.Name,
+		arg.Position,
 	)
 	return err
 }
@@ -214,7 +249,7 @@ func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) er
 	return err
 }
 
-const createShareholders = `-- name: CreateShareholders :exec
+const createShareholder = `-- name: CreateShareholder :exec
 INSERT INTO large_shareholders (
     no,
     company_id,
@@ -228,19 +263,50 @@ SET (
 ) = ($3, $4)
 `
 
-type CreateShareholdersParams struct {
+type CreateShareholderParams struct {
 	No              int32
 	CompanyID       int32
 	ShareOwnPercent pgtype.Float4
 	Shareholder     pgtype.Text
 }
 
-func (q *Queries) CreateShareholders(ctx context.Context, arg CreateShareholdersParams) error {
-	_, err := q.db.Exec(ctx, createShareholders,
+func (q *Queries) CreateShareholder(ctx context.Context, arg CreateShareholderParams) error {
+	_, err := q.db.Exec(ctx, createShareholder,
 		arg.No,
 		arg.CompanyID,
 		arg.ShareOwnPercent,
 		arg.Shareholder,
+	)
+	return err
+}
+
+const createSubsidiary = `-- name: CreateSubsidiary :exec
+INSERT INTO subsidiaries (
+    no,
+    company_id,
+    own_percent,
+    name
+) VALUES ($1, $2, $3, $4)
+ON CONFLICT (no, company_id) DO UPDATE
+SET (
+    own_percent,
+    name
+) = ($3, $4)
+`
+
+type CreateSubsidiaryParams struct {
+	No         int32
+	CompanyID  int32
+	OwnPercent pgtype.Float4
+	Name       pgtype.Text
+}
+
+func (q *Queries) CreateSubsidiary(ctx context.Context, arg CreateSubsidiaryParams) error {
+	_, err := q.db.Exec(ctx, createSubsidiary,
+		arg.No,
+		arg.CompanyID,
+		arg.OwnPercent,
+		arg.Name,
 	)
 	return err
 }

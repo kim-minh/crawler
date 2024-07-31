@@ -77,7 +77,7 @@ SET (
     promise
 ) = ($2, $3, $4, $5, $6, $7, $8);
 
--- name: CreateShareholders :exec
+-- name: CreateShareholder :exec
 INSERT INTO large_shareholders (
     no,
     company_id,
@@ -90,7 +90,7 @@ SET (
     shareholder
 ) = ($3, $4);
 
--- name: CreateInsiderDeals :exec
+-- name: CreateInsiderDeal :exec
 INSERT INTO insider_deals (
     company_id,
     deal_price,
@@ -100,3 +100,31 @@ INSERT INTO insider_deals (
     deal_action,
     deal_method
 ) VALUES ($1, $2, $3, $4, $5, $6, $7);
+
+-- name: CreateSubsidiary :exec
+INSERT INTO subsidiaries (
+    no,
+    company_id,
+    own_percent,
+    name
+) VALUES ($1, $2, $3, $4)
+ON CONFLICT (no, company_id) DO UPDATE
+SET (
+    own_percent,
+    name
+) = ($3, $4);
+
+-- name: CreateOfficer :exec
+INSERT INTO officers (
+    no,
+    company_id,
+    own_percent,
+    name,
+    position
+) VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (no, company_id) DO UPDATE
+SET (
+own_percent,
+    name,
+    position
+) = ($3, $4, $5);

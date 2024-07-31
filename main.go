@@ -17,4 +17,6 @@ func main() {
 	script.UpdateProfile(queries)
 	script.UpdateShareholders(queries)
 	script.UpdateInsiderDeals(queries)
+	script.UpdateSubsidiaries(queries)
+	script.UpdateOfficers(queries)
 }

@@ -31,14 +31,14 @@ func FetchInsiderDeals(ticker string) (insiderdeals, error) {
 	return data, err
 }
 
-func FetchSubsidiares(ticker string, page int) (subsidiaries, error) {
-	url := fmt.Sprintf("%s/tcanalysis/v1/company/%s/sub-companies?page=%d&size=100", host, ticker, page)
+func FetchSubsidiares(ticker string) (subsidiaries, error) {
+	url := fmt.Sprintf("%s/tcanalysis/v1/company/%s/sub-companies?page=0&size=20", host, ticker)
 	data, err := utils.Fetch[subsidiaries](url)
 	return data, err
 }
 
-func FetchOfficers(ticker string, page int) (officers, error) {
-	url := fmt.Sprintf("%s/tcanalysis/v1/company/%s/key-officers?page=%d&size=100", host, ticker, page)
+func FetchOfficers(ticker string) (officers, error) {
+	url := fmt.Sprintf("%s/tcanalysis/v1/company/%s/key-officers?page=0&size=10", host, ticker)
 	data, err := utils.Fetch[officers](url)
 	return data, err
 }

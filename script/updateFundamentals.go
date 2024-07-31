@@ -92,7 +92,7 @@ func UpdateShareholders(queries *db.Queries) {
 		}
 
 		for _, shareholder := range shareholders.Data {
-			err = queries.CreateShareholders(ctx, db.CreateShareholdersParams{
+			err = queries.CreateShareholder(ctx, db.CreateShareholderParams{
 				No:              shareholder.No,
 				CompanyID:       company.ID,
 				ShareOwnPercent: shareholder.OwnPercent,
@@ -131,7 +131,7 @@ func UpdateInsiderDeals(queries *db.Queries) {
 			dealMethod := pgtype.Text{String: methods[insiderDeal.DealingMethod], Valid: true}
 			dealAnnounceDate := pgtype.Timestamptz{Time: utils.FormatTime(insiderDeal.AnDate), Valid: true}
 
-			err = queries.CreateInsiderDeals(ctx, db.CreateInsiderDealsParams{
+			err = queries.CreateInsiderDeal(ctx, db.CreateInsiderDealParams{
 				CompanyID:        company.ID,
 				DealPrice:        dealPrice,
 				DealQuantity:     dealQuantity,
@@ -139,6 +139,53 @@ func UpdateInsiderDeals(queries *db.Queries) {
 				DealAnnounceDate: dealAnnounceDate,
 				DealAction:       dealAction,
 				DealMethod:       dealMethod,
+			})
+		}
+	})
+}
+
+func UpdateSubsidiaries(queries *db.Queries) {
+	ctx := context.Background()
+
+	var err error
+	defer utils.LogComplete(err, "subsidiaries")
+
+	updateEach(queries, func(company db.Company) {
+		subsidiaries, fetchErr := stfetch.FetchSubsidiares(company.Ticker)
+		if fetchErr != nil {
+			return
+		}
+
+		for _, subsidiary := range subsidiaries.Data {
+			err = queries.CreateSubsidiary(ctx, db.CreateSubsidiaryParams{
+				No:         subsidiary.No,
+				CompanyID:  company.ID,
+				OwnPercent: subsidiary.OwnPercent,
+				Name:       subsidiary.CompanyName,
+			})
+		}
+	})
+}
+
+func UpdateOfficers(queries *db.Queries) {
+	ctx := context.Background()
+
+	var err error
+	defer utils.LogComplete(err, "officers")
+
+	updateEach(queries, func(company db.Company) {
+		officers, fetchErr := stfetch.FetchOfficers(company.Ticker)
+		if fetchErr != nil {
+			return
+		}
+
+		for _, officer := range officers.Data {
+			err = queries.CreateOfficer(ctx, db.CreateOfficerParams{
+				No:         officer.No,
+				CompanyID:  company.ID,
+				OwnPercent: officer.OwnPercent,
+				Name:       officer.Name,
+				Position:   officer.Position,
 			})
 		}
 	})

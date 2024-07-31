@@ -80,7 +80,7 @@ type subsidiaries struct {
 
 type officers struct {
 	Data []struct {
-		No         pgtype.Int4   `json:"no"`
+		No         int32         `json:"no"`
 		Ticker     pgtype.Text   `json:"ticker"`
 		Name       pgtype.Text   `json:"name"`
 		Position   pgtype.Text   `json:"position"`
