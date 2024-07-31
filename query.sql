@@ -76,3 +76,16 @@ key_developments,
 profile,
 promise
 ) = ($2, $3, $4, $5, $6, $7, $8);
+
+-- name: CreateShareholders :exec
+INSERT INTO large_shareholders (
+no,
+company_id,
+share_own_percent,
+shareholder
+) VALUES ($1, $2, $3, $4)
+ON CONFLICT (no, company_id) DO UPDATE
+SET (
+share_own_percent,
+shareholder
+) = ($3, $4);

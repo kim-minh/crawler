@@ -26,7 +26,7 @@ func UpdateOverview(queries *db.Queries) {
 		utils.LogError(atoiErr)
 
 		err = queries.CreateOverview(ctx, db.CreateOverviewParams{
-			CompanyID:            pgtype.Int4{Int32: company.ID, Valid: true},
+			CompanyID:            company.ID,
 			DeltaInMonth:         overview.DeltaInMonth,
 			DeltaInWeek:          overview.DeltaInWeek,
 			DeltaInYear:          overview.DeltaInYear,
@@ -62,7 +62,7 @@ func UpdateProfile(queries *db.Queries) {
 		}
 
 		err = queries.CreateProfile(ctx, db.CreateProfileParams{
-			CompanyID:          pgtype.Int4{Int32: company.ID, Valid: true},
+			CompanyID:          company.ID,
 			BusinessRisk:       utils.ExtractText(profile.BusinessRisk),
 			BusinessStrategies: utils.ExtractText(profile.BusinessStrategies),
 			CompanyName:        profile.CompanyName,
@@ -74,4 +74,26 @@ func UpdateProfile(queries *db.Queries) {
 	})
 
 	defer utils.LogComplete(err, "profile")
+}
+
+func UpdateShareholders(queries *db.Queries) {
+	ctx := context.Background()
+
+	var err error
+	updateEach(queries, func(company db.Company) {
+		shareholders, err := stfetch.FetchShareholders(company.Ticker)
+		if err != nil {
+			return
+		}
+
+		for _, shareholder := range shareholders.Data {
+			err = queries.CreateShareholders(ctx, db.CreateShareholdersParams{
+				No:              shareholder.No,
+				CompanyID:       company.ID,
+				ShareOwnPercent: shareholder.OwnPercent,
+				Shareholder:     shareholder.Name,
+			})
+		}
+	})
+	utils.LogComplete(err, "shareholders")
 }

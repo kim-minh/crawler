@@ -10,7 +10,7 @@ import (
 
 type BalanceSheet struct {
 	ID                     int32
-	CompanyID              pgtype.Int4
+	CompanyID              int32
 	Quarter                pgtype.Int2
 	Year                   pgtype.Int2
 	Asset                  pgtype.Int4
@@ -51,7 +51,7 @@ type BalanceSheet struct {
 
 type CashFlow struct {
 	ID            int32
-	CompanyID     pgtype.Int4
+	CompanyID     int32
 	Quarter       pgtype.Int2
 	Year          pgtype.Int2
 	InvestCost    pgtype.Int4
@@ -71,7 +71,7 @@ type Company struct {
 
 type Dividend struct {
 	ID                     int32
-	CompanyID              pgtype.Int4
+	CompanyID              int32
 	ExerciseDate           pgtype.Timestamptz
 	CashYear               pgtype.Int2
 	CashDividendPercentage pgtype.Float4
@@ -80,7 +80,7 @@ type Dividend struct {
 
 type Event struct {
 	ID                      int32
-	CompanyID               pgtype.Int4
+	CompanyID               int32
 	Price                   pgtype.Int4
 	PriceChange             pgtype.Int4
 	PriceChangeRatio        pgtype.Float4
@@ -98,7 +98,7 @@ type Event struct {
 
 type IncomeStatement struct {
 	ID                             int32
-	CompanyID                      pgtype.Int4
+	CompanyID                      int32
 	Quarter                        pgtype.Int2
 	Year                           pgtype.Int2
 	Revenue                        pgtype.Int4
@@ -126,7 +126,7 @@ type IncomeStatement struct {
 
 type InsiderDeal struct {
 	ID               int32
-	CompanyID        pgtype.Int4
+	CompanyID        int32
 	DealPrice        pgtype.Int4
 	DealQuantity     pgtype.Int4
 	DealRatio        pgtype.Float4
@@ -137,14 +137,15 @@ type InsiderDeal struct {
 
 type LargeShareholder struct {
 	ID              int32
-	CompanyID       pgtype.Int4
+	No              int32
+	CompanyID       int32
 	ShareOwnPercent pgtype.Float4
 	Shareholder     pgtype.Text
 }
 
 type News struct {
 	ID                      int32
-	CompanyID               pgtype.Int4
+	CompanyID               int32
 	Price                   pgtype.Int4
 	PriceChange             pgtype.Int4
 	PriceChangeRatio        pgtype.Float4
@@ -158,7 +159,8 @@ type News struct {
 
 type Officer struct {
 	ID         int32
-	CompanyID  pgtype.Int4
+	No         int32
+	CompanyID  int32
 	OwnPercent pgtype.Float4
 	Name       pgtype.Text
 	Position   pgtype.Text
@@ -166,7 +168,7 @@ type Officer struct {
 
 type Overview struct {
 	ID                   int32
-	CompanyID            pgtype.Int4
+	CompanyID            int32
 	DeltaInMonth         pgtype.Float4
 	DeltaInWeek          pgtype.Float4
 	DeltaInYear          pgtype.Float4
@@ -189,7 +191,7 @@ type Overview struct {
 
 type Profile struct {
 	ID                 int32
-	CompanyID          pgtype.Int4
+	CompanyID          int32
 	BusinessRisk       pgtype.Text
 	BusinessStrategies pgtype.Text
 	CompanyName        pgtype.Text
@@ -201,7 +203,7 @@ type Profile struct {
 
 type Ratio struct {
 	ID                      int32
-	CompanyID               pgtype.Int4
+	CompanyID               int32
 	Quarter                 pgtype.Int2
 	Year                    pgtype.Int2
 	PriceToEarning          pgtype.Float4
@@ -264,7 +266,7 @@ type Ratio struct {
 
 type StockHistorical struct {
 	ID        int32
-	CompanyID pgtype.Int4
+	CompanyID int32
 	Close     pgtype.Int4
 	High      pgtype.Int4
 	Low       pgtype.Int4
@@ -285,7 +287,7 @@ type StockIndicesCompany struct {
 
 type StockIntraday struct {
 	ID                  int32
-	CompanyID           pgtype.Int4
+	CompanyID           int32
 	Price               pgtype.Float4
 	Volume              pgtype.Int4
 	OrderType           pgtype.Text
@@ -295,7 +297,8 @@ type StockIntraday struct {
 
 type Subsidiary struct {
 	ID         int32
-	CompanyID  pgtype.Int4
+	No         int32
+	CompanyID  int32
 	OwnPercent pgtype.Float4
 	Name       pgtype.Text
 }

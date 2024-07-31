@@ -85,7 +85,7 @@ website
 `
 
 type CreateOverviewParams struct {
-	CompanyID            pgtype.Int4
+	CompanyID            int32
 	DeltaInMonth         pgtype.Float4
 	DeltaInWeek          pgtype.Float4
 	DeltaInYear          pgtype.Float4
@@ -155,7 +155,7 @@ promise
 `
 
 type CreateProfileParams struct {
-	CompanyID          pgtype.Int4
+	CompanyID          int32
 	BusinessRisk       pgtype.Text
 	BusinessStrategies pgtype.Text
 	CompanyName        pgtype.Text
@@ -175,6 +175,37 @@ func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) er
 		arg.KeyDevelopments,
 		arg.Profile,
 		arg.Promise,
+	)
+	return err
+}
+
+const createShareholders = `-- name: CreateShareholders :exec
+INSERT INTO large_shareholders (
+no,
+company_id,
+share_own_percent,
+shareholder
+) VALUES ($1, $2, $3, $4)
+ON CONFLICT (no, company_id) DO UPDATE
+SET (
+share_own_percent,
+shareholder
+) = ($3, $4)
+`
+
+type CreateShareholdersParams struct {
+	No              int32
+	CompanyID       int32
+	ShareOwnPercent pgtype.Float4
+	Shareholder     pgtype.Text
+}
+
+func (q *Queries) CreateShareholders(ctx context.Context, arg CreateShareholdersParams) error {
+	_, err := q.db.Exec(ctx, createShareholders,
+		arg.No,
+		arg.CompanyID,
+		arg.ShareOwnPercent,
+		arg.Shareholder,
 	)
 	return err
 }

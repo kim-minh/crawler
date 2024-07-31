@@ -11,6 +11,7 @@ func main() {
 	defer pool.Close()
 
 	script.UpdateCompanies(queries)
-	defer script.UpdateOverview(queries)
-	defer script.UpdateProfile(queries)
+	// defer script.UpdateOverview(queries)
+	// defer script.UpdateProfile(queries)
+	defer script.UpdateShareholders(queries)
 }

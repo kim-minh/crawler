@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS companies
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -12,7 +10,7 @@ CREATE TABLE IF NOT EXISTS companies
 CREATE TABLE IF NOT EXISTS overview
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER UNIQUE,
+    company_id INTEGER NOT NULL UNIQUE,
     delta_in_month REAL,
     delta_in_week REAL,
     delta_in_year REAL,
@@ -36,7 +34,7 @@ CREATE TABLE IF NOT EXISTS overview
 CREATE TABLE IF NOT EXISTS profile
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER UNIQUE,
+    company_id INTEGER NOT NULL UNIQUE,
     business_risk TEXT,
     business_strategies TEXT,
     company_name TEXT,
@@ -48,8 +46,9 @@ CREATE TABLE IF NOT EXISTS profile
 
 CREATE TABLE IF NOT EXISTS large_shareholders
 (
-    id INTEGER PRIMARY KEY,
-    company_id INTEGER,
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    no INTEGER NOT NULL,
+    company_id INTEGER NOT NULL,
     share_own_percent REAL,
     shareholder TEXT
 );
@@ -57,7 +56,7 @@ CREATE TABLE IF NOT EXISTS large_shareholders
 CREATE TABLE IF NOT EXISTS insider_deals
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER,
+    company_id INTEGER NOT NULL,
     deal_price INTEGER,
     deal_quantity INTEGER,
     deal_ratio REAL,
@@ -69,15 +68,17 @@ CREATE TABLE IF NOT EXISTS insider_deals
 CREATE TABLE IF NOT EXISTS subsidiaries
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER,
+    no INTEGER NOT NULL,
+    company_id INTEGER NOT NULL,
     own_percent REAL,
     name TEXT
 );
 
 CREATE TABLE IF NOT EXISTS officers
 (
-    id INTEGER PRIMARY KEY,
-    company_id INTEGER,
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    no INTEGER NOT NULL,
+    company_id INTEGER NOT NULL,
     own_percent REAL,
     name TEXT,
     "position" TEXT
@@ -86,7 +87,7 @@ CREATE TABLE IF NOT EXISTS officers
 CREATE TABLE IF NOT EXISTS events
 (
     id INTEGER PRIMARY KEY,
-    company_id INTEGER,
+    company_id INTEGER NOT NULL,
     price INTEGER,
     price_change INTEGER,
     price_change_ratio REAL,
@@ -105,7 +106,7 @@ CREATE TABLE IF NOT EXISTS events
 CREATE TABLE IF NOT EXISTS news
 (
     id INTEGER PRIMARY KEY,
-    company_id INTEGER,
+    company_id INTEGER NOT NULL,
     price INTEGER,
     price_change INTEGER,
     price_change_ratio REAL,
@@ -120,7 +121,7 @@ CREATE TABLE IF NOT EXISTS news
 CREATE TABLE IF NOT EXISTS dividends
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER,
+    company_id INTEGER NOT NULL,
     exercise_date TIMESTAMPTZ,
     cash_year SMALLINT,
     cash_dividend_percentage REAL,
@@ -130,7 +131,7 @@ CREATE TABLE IF NOT EXISTS dividends
 CREATE TABLE IF NOT EXISTS balance_sheet
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER,
+    company_id INTEGER NOT NULL,
     quarter SMALLINT,
     year SMALLINT,
     asset INTEGER,
@@ -172,7 +173,7 @@ CREATE TABLE IF NOT EXISTS balance_sheet
 CREATE TABLE IF NOT EXISTS income_statement
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER,
+    company_id INTEGER NOT NULL,
     quarter SMALLINT,
     year SMALLINT,
     revenue INTEGER,
@@ -201,7 +202,7 @@ CREATE TABLE IF NOT EXISTS income_statement
 CREATE TABLE IF NOT EXISTS cash_flow
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER,
+    company_id INTEGER NOT NULL,
     quarter SMALLINT,
     year SMALLINT,
     invest_cost INTEGER,
@@ -214,7 +215,7 @@ CREATE TABLE IF NOT EXISTS cash_flow
 CREATE TABLE IF NOT EXISTS ratio
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER,
+    company_id INTEGER NOT NULL,
     quarter SMALLINT,
     year SMALLINT,
     price_to_earning REAL,
@@ -279,7 +280,7 @@ CREATE TABLE IF NOT EXISTS ratio
 CREATE TABLE IF NOT EXISTS stock_historical
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER,
+    company_id INTEGER NOT NULL,
     close INTEGER,
     high INTEGER,
     low INTEGER,
@@ -291,7 +292,7 @@ CREATE TABLE IF NOT EXISTS stock_historical
 CREATE TABLE IF NOT EXISTS stock_intraday
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    company_id INTEGER,
+    company_id INTEGER NOT NULL,
     price REAL,
     volume INTEGER,
     order_type TEXT,
@@ -302,75 +303,94 @@ CREATE TABLE IF NOT EXISTS stock_intraday
 CREATE TABLE IF NOT EXISTS stock_indices
 (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    index_name text
+    index_name TEXT
 );
 
-CREATE TABLE IF NOT EXISTS stock_indices_companies
+CREATE TABLE IF NOT EXISTS stock_indices_company
 (
     companies_id INTEGER NOT NULL,
     stock_indices_id INTEGER NOT NULL,
-    CONSTRAINT stock_indices_companies_pkey PRIMARY KEY (companies_id, stock_indices_id)
+    CONSTRAINT stock_indices_company_pkey PRIMARY KEY (companies_id, stock_indices_id)
 );
 
 ALTER TABLE IF EXISTS overview
     ADD CONSTRAINT fkkke2ivq536ntcq3uf971cinvs FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE NO ACTION;
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
 
 ALTER TABLE IF EXISTS profile
     ADD CONSTRAINT fkq8yb3fsal2ki2kq0y1uaeanbv FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE NO ACTION;
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
 
 ALTER TABLE IF EXISTS large_shareholders
     ADD CONSTRAINT fk68kwgcstm9agktuix7412f1nd FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE NO ACTION;
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
 
 ALTER TABLE IF EXISTS insider_deals
     ADD CONSTRAINT fk2f327y1ev9x8skio8pt3eyntc FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE NO ACTION;
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
+
+CREATE INDEX IF NOT EXISTS insider_deals_company_id_key
+    ON insider_deals(company_id);
 
 ALTER TABLE IF EXISTS subsidiaries
     ADD CONSTRAINT fki00iunoyfjax2o1f8it06o5gf FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE NO ACTION;
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
+
+ALTER TABLE IF EXISTS subsidiaries
+    ADD CONSTRAINT ukn34v6gxymevgk6dsjm5ytk3rc UNIQUE (no, company_id);
 
 ALTER TABLE IF EXISTS officers
     ADD CONSTRAINT fklr36u6croi4qsm6o5natkrbi3 FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE NO ACTION;
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
+
+ALTER TABLE IF EXISTS officers
+    ADD CONSTRAINT uk9bds8w33qchfewqcysj0c0r85 UNIQUE (no, company_id);
 
 ALTER TABLE IF EXISTS events
     ADD CONSTRAINT fkpndphgrrt2p3rr01e9ymfwx4k FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE NO ACTION;
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
+
+CREATE INDEX IF NOT EXISTS events_company_id_key
+    ON events(company_id);
 
 ALTER TABLE IF EXISTS news
     ADD CONSTRAINT fkj0xjflx1i92l78pxehr0t3or0 FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE NO ACTION;
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
+
+CREATE INDEX IF NOT EXISTS news_company_id_key
+    ON news(company_id);
 
 ALTER TABLE IF EXISTS dividends
     ADD CONSTRAINT fkmqw4w4pnq15r0vgudmilbnqis FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE NO ACTION;
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
+
+CREATE INDEX IF NOT EXISTS dividends_company_id_key
+    ON dividends(company_id);
 
 ALTER TABLE IF EXISTS balance_sheet
     ADD CONSTRAINT fkk3vw9pj6rm6he5g36pjkenss1 FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION;
+    ON DELETE CASCADE;
+
 CREATE INDEX IF NOT EXISTS balance_sheet_company_id_key
     ON balance_sheet(company_id);
 
@@ -378,7 +398,8 @@ ALTER TABLE IF EXISTS income_statement
     ADD CONSTRAINT fkao43vi7gt01d1gl1knhikkyaa FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION;
+    ON DELETE CASCADE;
+
 CREATE INDEX IF NOT EXISTS income_statement_company_id_key
     ON income_statement(company_id);
 
@@ -386,44 +407,46 @@ ALTER TABLE IF EXISTS cash_flow
     ADD CONSTRAINT fkjgim8e6bj8m597jpmu0x5gn5c FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION;
+    ON DELETE CASCADE;
+
 CREATE INDEX IF NOT EXISTS cash_flow_company_id_key
     ON cash_flow(company_id);
-
 
 ALTER TABLE IF EXISTS ratio
     ADD CONSTRAINT fkiru0von3m59nmdcu0e6ofpay3 FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION;
+    ON DELETE CASCADE;
+
 CREATE INDEX IF NOT EXISTS ratio_company_id_key
     ON ratio(company_id);
-
 
 ALTER TABLE IF EXISTS stock_historical
     ADD CONSTRAINT fkfvi1rkoojsesrc9pc7khrfpth FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION;
+    ON DELETE CASCADE;
 
+CREATE INDEX IF NOT EXISTS stock_historical_company_id_key
+    ON stock_historical(company_id);
 
 ALTER TABLE IF EXISTS stock_intraday
     ADD CONSTRAINT fksu5dlmy8u3f7fwi7oi471jud7 FOREIGN KEY (company_id)
     REFERENCES companies (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION;
+    ON DELETE CASCADE;
 
+CREATE INDEX IF NOT EXISTS stock_intraday_company_id_key
+    ON stock_intraday(company_id);
 
-ALTER TABLE IF EXISTS stock_indices_companies
+ALTER TABLE IF EXISTS stock_indices_company
     ADD CONSTRAINT fkd8347mlarhi4cdjkp96rpx1vv FOREIGN KEY (stock_indices_id)
     REFERENCES stock_indices (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
 
-
-ALTER TABLE IF EXISTS stock_indices_companies
+ALTER TABLE IF EXISTS stock_indices_company
     ADD CONSTRAINT fktbbkx4xhvomfm71ku7xtc5nn2 FOREIGN KEY (companies_id)
     REFERENCES companies (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
-END;

@@ -49,7 +49,7 @@ type profile struct {
 
 type shareholders struct {
 	Data []struct {
-		No         pgtype.Int4   `json:"no"`
+		No         int32         `json:"no"`
 		Ticker     pgtype.Text   `json:"ticker"`
 		Name       pgtype.Text   `json:"name"`
 		OwnPercent pgtype.Float4 `json:"ownPercent"`
@@ -58,7 +58,7 @@ type shareholders struct {
 
 type insiderdeals struct {
 	Data []struct {
-		No            pgtype.Int4        `json:"no"`
+		No            int32              `json:"no"`
 		Ticker        pgtype.Text        `json:"ticker"`
 		AnDate        pgtype.Timestamptz `json:"anDate"`
 		DealingMethod pgtype.Int4        `json:"dealingMethod"`
@@ -71,7 +71,7 @@ type insiderdeals struct {
 
 type subsidiaries struct {
 	Data []struct {
-		No          pgtype.Int4   `json:"no"`
+		No          int32         `json:"no"`
 		Ticker      pgtype.Text   `json:"ticker"`
 		CompanyName pgtype.Text   `json:"companyName"`
 		OwnPercent  pgtype.Float4 `json:"ownPercent"`
