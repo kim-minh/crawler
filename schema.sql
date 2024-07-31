@@ -449,4 +449,4 @@ ALTER TABLE IF EXISTS stock_indices_company
     ADD CONSTRAINT fktbbkx4xhvomfm71ku7xtc5nn2 FOREIGN KEY (companies_id)
     REFERENCES companies (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION;
+    ON DELETE CASCADE;

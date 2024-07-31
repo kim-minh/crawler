@@ -13,9 +13,9 @@ import (
 
 const createCompany = `-- name: CreateCompany :exec
 INSERT INTO companies (
-fullname_vi, company_type, exchange, ticker
+    fullname_vi, company_type, exchange, ticker
 ) VALUES (
-  $1, $2, $3, $4
+    $1, $2, $3, $4
 ) ON CONFLICT (ticker) DO UPDATE
 SET (fullname_vi, company_type, exchange)
 = ($1, $2, $3)
@@ -38,49 +38,84 @@ func (q *Queries) CreateCompany(ctx context.Context, arg CreateCompanyParams) er
 	return err
 }
 
+const createInsiderDeals = `-- name: CreateInsiderDeals :exec
+INSERT INTO insider_deals (
+    company_id,
+    deal_price,
+    deal_quantity,
+    deal_ratio,
+    deal_announce_date,
+    deal_action,
+    deal_method
+) VALUES ($1, $2, $3, $4, $5, $6, $7)
+`
+
+type CreateInsiderDealsParams struct {
+	CompanyID        int32
+	DealPrice        pgtype.Int4
+	DealQuantity     pgtype.Int4
+	DealRatio        pgtype.Float4
+	DealAnnounceDate pgtype.Timestamptz
+	DealAction       pgtype.Text
+	DealMethod       pgtype.Text
+}
+
+func (q *Queries) CreateInsiderDeals(ctx context.Context, arg CreateInsiderDealsParams) error {
+	_, err := q.db.Exec(ctx, createInsiderDeals,
+		arg.CompanyID,
+		arg.DealPrice,
+		arg.DealQuantity,
+		arg.DealRatio,
+		arg.DealAnnounceDate,
+		arg.DealAction,
+		arg.DealMethod,
+	)
+	return err
+}
+
 const createOverview = `-- name: CreateOverview :exec
 INSERT INTO overview (
-company_id,
-delta_in_month,
-delta_in_week,
-delta_in_year,
-established_year,
-foreign_percent,
-industry_id,
-industry_id_v2,
-issue_share,
-number_of_employees,
-number_of_shareholders,
-outstanding_share,
-stock_rating,
-company_type,
-exchange,
-industry,
-industry_en,
-short_name,
-website
+    company_id,
+    delta_in_month,
+    delta_in_week,
+    delta_in_year,
+    established_year,
+    foreign_percent,
+    industry_id,
+    industry_id_v2,
+    issue_share,
+    number_of_employees,
+    number_of_shareholders,
+    outstanding_share,
+    stock_rating,
+    company_type,
+    exchange,
+    industry,
+    industry_en,
+    short_name,
+    website
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
 ) ON CONFLICT (company_id) DO UPDATE
 SET (
-delta_in_month,
-delta_in_week,
-delta_in_year,
-established_year,
-foreign_percent,
-industry_id,
-industry_id_v2,
-issue_share,
-number_of_employees,
-number_of_shareholders,
-outstanding_share,
-stock_rating,
-company_type,
-exchange,
-industry,
-industry_en,
-short_name,
-website
+    delta_in_month,
+    delta_in_week,
+    delta_in_year,
+    established_year,
+    foreign_percent,
+    industry_id,
+    industry_id_v2,
+    issue_share,
+    number_of_employees,
+    number_of_shareholders,
+    outstanding_share,
+    stock_rating,
+    company_type,
+    exchange,
+    industry,
+    industry_en,
+    short_name,
+    website
 ) = ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
 `
 
@@ -133,24 +168,24 @@ func (q *Queries) CreateOverview(ctx context.Context, arg CreateOverviewParams) 
 
 const createProfile = `-- name: CreateProfile :exec
 INSERT INTO profile (
-company_id,
-business_risk,
-business_strategies,
-company_name,
-history_dev,
-key_developments,
-profile,
-promise
+    company_id,
+    business_risk,
+    business_strategies,
+    company_name,
+    history_dev,
+    key_developments,
+    profile,
+    promise
 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 ON CONFLICT (company_id) DO UPDATE
 SET (
-business_risk,
-business_strategies,
-company_name,
-history_dev,
-key_developments,
-profile,
-promise
+    business_risk,
+    business_strategies,
+    company_name,
+    history_dev,
+    key_developments,
+    profile,
+    promise
 ) = ($2, $3, $4, $5, $6, $7, $8)
 `
 
@@ -181,15 +216,15 @@ func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) er
 
 const createShareholders = `-- name: CreateShareholders :exec
 INSERT INTO large_shareholders (
-no,
-company_id,
-share_own_percent,
-shareholder
+    no,
+    company_id,
+    share_own_percent,
+    shareholder
 ) VALUES ($1, $2, $3, $4)
 ON CONFLICT (no, company_id) DO UPDATE
 SET (
-share_own_percent,
-shareholder
+    share_own_percent,
+    shareholder
 ) = ($3, $4)
 `
 

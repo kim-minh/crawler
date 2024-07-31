@@ -15,12 +15,12 @@ type overview struct {
 	Exchange         pgtype.Text   `json:"exchange"`
 	ShortName        pgtype.Text   `json:"shortName"`
 	IndustryID       pgtype.Int4   `json:"industryID"`
-	IndustryIDv2     pgtype.Text   `json:"industryIDv2"`
+	IndustryIDv2     string        `json:"industryIDv2"`
 	IndustryIDLevel2 pgtype.Text   `json:"industryIdLevel2"`
 	IndustryIDLevel4 pgtype.Text   `json:"industryIdLevel4"`
 	Industry         pgtype.Text   `json:"industry"`
 	IndustryEn       pgtype.Text   `json:"industryEn"`
-	EstablishedYear  pgtype.Text   `json:"establishedYear"`
+	EstablishedYear  string        `json:"establishedYear"`
 	NoEmployees      pgtype.Int4   `json:"noEmployees"`
 	NoShareholders   pgtype.Int4   `json:"noShareholders"`
 	ForeignPercent   pgtype.Float4 `json:"foreignPercent"`
@@ -58,14 +58,14 @@ type shareholders struct {
 
 type insiderdeals struct {
 	Data []struct {
-		No            int32              `json:"no"`
-		Ticker        pgtype.Text        `json:"ticker"`
-		AnDate        pgtype.Timestamptz `json:"anDate"`
-		DealingMethod pgtype.Int4        `json:"dealingMethod"`
-		DealingAction pgtype.Text        `json:"dealingAction"`
-		Quantity      pgtype.Float4      `json:"quantity"`
-		Price         pgtype.Float4      `json:"price"`
-		Ratio         pgtype.Float4      `json:"ratio"`
+		No            int32         `json:"no"`
+		Ticker        pgtype.Text   `json:"ticker"`
+		AnDate        string        `json:"anDate"`
+		DealingMethod int           `json:"dealingMethod"`
+		DealingAction string        `json:"dealingAction"`
+		Quantity      pgtype.Float4 `json:"quantity"`
+		Price         pgtype.Float4 `json:"price"`
+		Ratio         pgtype.Float4 `json:"ratio"`
 	} `json:"listInsiderDealing"`
 }
 

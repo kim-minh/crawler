@@ -20,20 +20,23 @@ func UpdateOverview(queries *db.Queries) {
 			return
 		}
 
-		establishedYear, atoiErr := strconv.Atoi(overview.EstablishedYear.String)
+		year, atoiErr := strconv.Atoi(overview.EstablishedYear)
 		utils.LogError(atoiErr)
-		industryIDV2, atoiErr := strconv.Atoi(overview.IndustryIDv2.String)
+		establishYear := pgtype.Int2{Int16: int16(year), Valid: true}
+
+		id, atoiErr := strconv.Atoi(overview.IndustryIDv2)
 		utils.LogError(atoiErr)
+		industryIDV2 := pgtype.Int4{Int32: int32(id), Valid: true}
 
 		err = queries.CreateOverview(ctx, db.CreateOverviewParams{
 			CompanyID:            company.ID,
 			DeltaInMonth:         overview.DeltaInMonth,
 			DeltaInWeek:          overview.DeltaInWeek,
 			DeltaInYear:          overview.DeltaInYear,
-			EstablishedYear:      pgtype.Int2{Int16: int16(establishedYear), Valid: true},
+			EstablishedYear:      establishYear,
 			ForeignPercent:       overview.ForeignPercent,
 			IndustryID:           overview.IndustryID,
-			IndustryIDV2:         pgtype.Int4{Int32: int32(industryIDV2), Valid: true},
+			IndustryIDV2:         industryIDV2,
 			IssueShare:           overview.IssueShare,
 			NumberOfEmployees:    overview.NoEmployees,
 			NumberOfShareholders: overview.NoShareholders,
@@ -56,8 +59,8 @@ func UpdateProfile(queries *db.Queries) {
 
 	var err error
 	updateEach(queries, func(company db.Company) {
-		profile, err := stfetch.FetchProfile(company.Ticker)
-		if err != nil {
+		profile, fetchErr := stfetch.FetchProfile(company.Ticker)
+		if fetchErr != nil {
 			return
 		}
 
@@ -81,8 +84,8 @@ func UpdateShareholders(queries *db.Queries) {
 
 	var err error
 	updateEach(queries, func(company db.Company) {
-		shareholders, err := stfetch.FetchShareholders(company.Ticker)
-		if err != nil {
+		shareholders, fetchErr := stfetch.FetchShareholders(company.Ticker)
+		if fetchErr != nil {
 			return
 		}
 
@@ -96,4 +99,45 @@ func UpdateShareholders(queries *db.Queries) {
 		}
 	})
 	utils.LogComplete(err, "shareholders")
+}
+
+func UpdateInsiderDeals(queries *db.Queries) {
+	ctx := context.Background()
+
+	actions := map[string]string{
+		"0": "Mua",
+		"1": "Bán",
+	}
+	methods := map[int]string{
+		0: "Cổ đông nội bộ",
+		1: "Cổ đông lớn",
+		2: "Cổ đông sáng lập",
+	}
+
+	var err error
+	updateEach(queries, func(company db.Company) {
+		insiderDeals, fetchErr := stfetch.FetchInsiderDeals(company.Ticker)
+		if fetchErr != nil {
+			return
+		}
+
+		for _, insiderDeal := range insiderDeals.Data {
+			dealPrice := pgtype.Int4{Int32: int32(insiderDeal.Price.Float32), Valid: true}
+			dealQuantity := pgtype.Int4{Int32: int32(insiderDeal.Quantity.Float32), Valid: true}
+			dealAction := pgtype.Text{String: actions[insiderDeal.DealingAction], Valid: true}
+			dealMethod := pgtype.Text{String: methods[insiderDeal.DealingMethod], Valid: true}
+			dealAnnounceDate := pgtype.Timestamptz{Time: utils.FormatTime(insiderDeal.AnDate), Valid: true}
+
+			err = queries.CreateInsiderDeals(ctx, db.CreateInsiderDealsParams{
+				CompanyID:        company.ID,
+				DealPrice:        dealPrice,
+				DealQuantity:     dealQuantity,
+				DealRatio:        insiderDeal.Ratio,
+				DealAnnounceDate: dealAnnounceDate,
+				DealAction:       dealAction,
+				DealMethod:       dealMethod,
+			})
+		}
+	})
+	utils.LogComplete(err, "insider deals")
 }

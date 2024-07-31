@@ -10,8 +10,10 @@ func main() {
 	queries := db.New(pool)
 	defer pool.Close()
 
-	script.UpdateCompanies(queries)
-	// defer script.UpdateOverview(queries)
-	// defer script.UpdateProfile(queries)
-	defer script.UpdateShareholders(queries)
+	script.UpdateCompanies(queries) //Must run first
+
+	script.UpdateOverview(queries)
+	script.UpdateProfile(queries)
+	script.UpdateShareholders(queries)
+	script.UpdateInsiderDeals(queries)
 }
