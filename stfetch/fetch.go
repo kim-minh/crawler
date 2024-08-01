@@ -1,22 +1,23 @@
-package utils
+package stfetch
 
 import (
+	"crawler/utils"
 	"encoding/json"
 	"io"
 	"net/http"
 )
 
-func Fetch[T any](url string) (T, error) {
+func fetch[T any](url string) (T, error) {
 	res, err := http.Get(url)
-	LogFetchError(res, err)
+	utils.LogFetchError(res, err)
 
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
-	LogRequestBodyError(err)
+	utils.LogRequestBodyError(err)
 
 	var data T
 	err = json.Unmarshal(body, &data)
-	LogJsonError(err)
+	utils.LogJsonError(err)
 
 	return data, err
 }
