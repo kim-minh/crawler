@@ -128,3 +128,22 @@ own_percent,
     name,
     position
 ) = ($3, $4, $5);
+
+-- name: CreateEvent :exec
+INSERT INTO events (
+id,
+company_id,
+price,
+price_change,
+price_change_ratio,
+monthly_price_change_ratio,
+ex_rights_date,
+exercise_date,
+notify_date ,
+registration_final_date,
+event_code,
+event_name,
+event_description,
+rsi,
+rs
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);

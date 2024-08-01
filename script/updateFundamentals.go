@@ -134,22 +134,21 @@ func UpdateInsiderDeals(queries *db.Queries) {
 		}
 
 		for _, insiderDeal := range insiderDeals.Data {
-			dealPrice := pgtype.Int4{Int32: int32(insiderDeal.Price.Float32), Valid: true}
-			dealQuantity := pgtype.Int4{Int32: int32(insiderDeal.Quantity.Float32), Valid: true}
-			dealAction := pgtype.Text{String: actions[insiderDeal.DealingAction], Valid: true}
-			dealMethod := pgtype.Text{String: methods[insiderDeal.DealingMethod], Valid: true}
-			dealAnnounceDate := pgtype.Timestamptz{Time: utils.FormatTime(insiderDeal.AnDate), Valid: true}
-
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
+
+				dealPrice := pgtype.Int4{Int32: int32(insiderDeal.Price), Valid: true}
+				dealQuantity := pgtype.Int4{Int32: int32(insiderDeal.Quantity), Valid: true}
+				dealAction := pgtype.Text{String: actions[insiderDeal.DealingAction], Valid: true}
+				dealMethod := pgtype.Text{String: methods[insiderDeal.DealingMethod], Valid: true}
 
 				err := queries.CreateInsiderDeal(ctx, db.CreateInsiderDealParams{
 					CompanyID:        company.ID,
 					DealPrice:        dealPrice,
 					DealQuantity:     dealQuantity,
 					DealRatio:        insiderDeal.Ratio,
-					DealAnnounceDate: dealAnnounceDate,
+					DealAnnounceDate: utils.FormatDate(insiderDeal.AnDate),
 					DealAction:       dealAction,
 					DealMethod:       dealMethod,
 				})
@@ -215,6 +214,48 @@ func UpdateOfficers(queries *db.Queries) {
 					OwnPercent: officer.OwnPercent,
 					Name:       officer.Name,
 					Position:   officer.Position,
+				})
+
+				if err != nil {
+					c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
+				}
+			}()
+		}
+		wg.Wait()
+	})
+}
+
+func UpdateEvents(queries *db.Queries) {
+	ctx := context.Background()
+	var wg sync.WaitGroup
+
+	updateEach(queries, "events", func(company db.Company, c chan<- utils.UpdateError) {
+		events, fetchErr := stfetch.FetchEvents(company.Ticker)
+		if fetchErr != nil {
+			return
+		}
+
+		for _, event := range events.Data {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+
+				err := queries.CreateEvent(ctx, db.CreateEventParams{
+					ID:                      event.ID,
+					CompanyID:               company.ID,
+					Price:                   event.Price,
+					PriceChange:             event.PriceChange,
+					PriceChangeRatio:        event.PriceChangeRatio,
+					MonthlyPriceChangeRatio: event.PriceChangeRatio1M,
+					ExRightsDate:            utils.FormatTime(event.ExRigthDate),
+					ExerciseDate:            utils.FormatTime(event.ExerDate),
+					NotifyDate:              utils.FormatTime(event.NotifyDate),
+					RegistrationFinalDate:   utils.FormatTime(event.RegFinalDate),
+					EventCode:               event.EventCode,
+					EventName:               event.EventName,
+					EventDescription:        utils.ExtractText(event.EventDesc),
+					Rsi:                     event.Rsi,
+					Rs:                      event.Rs,
 				})
 
 				if err != nil {

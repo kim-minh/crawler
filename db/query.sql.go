@@ -38,6 +38,65 @@ func (q *Queries) CreateCompany(ctx context.Context, arg CreateCompanyParams) er
 	return err
 }
 
+const createEvent = `-- name: CreateEvent :exec
+INSERT INTO events (
+id,
+company_id,
+price,
+price_change,
+price_change_ratio,
+monthly_price_change_ratio,
+ex_rights_date,
+exercise_date,
+notify_date ,
+registration_final_date,
+event_code,
+event_name,
+event_description,
+rsi,
+rs
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+`
+
+type CreateEventParams struct {
+	ID                      int32
+	CompanyID               int32
+	Price                   pgtype.Int4
+	PriceChange             pgtype.Int4
+	PriceChangeRatio        pgtype.Float4
+	MonthlyPriceChangeRatio pgtype.Float4
+	ExRightsDate            pgtype.Timestamptz
+	ExerciseDate            pgtype.Timestamptz
+	NotifyDate              pgtype.Timestamptz
+	RegistrationFinalDate   pgtype.Timestamptz
+	EventCode               pgtype.Text
+	EventName               pgtype.Text
+	EventDescription        pgtype.Text
+	Rsi                     pgtype.Float4
+	Rs                      pgtype.Float4
+}
+
+func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) error {
+	_, err := q.db.Exec(ctx, createEvent,
+		arg.ID,
+		arg.CompanyID,
+		arg.Price,
+		arg.PriceChange,
+		arg.PriceChangeRatio,
+		arg.MonthlyPriceChangeRatio,
+		arg.ExRightsDate,
+		arg.ExerciseDate,
+		arg.NotifyDate,
+		arg.RegistrationFinalDate,
+		arg.EventCode,
+		arg.EventName,
+		arg.EventDescription,
+		arg.Rsi,
+		arg.Rs,
+	)
+	return err
+}
+
 const createInsiderDeal = `-- name: CreateInsiderDeal :exec
 INSERT INTO insider_deals (
     company_id,

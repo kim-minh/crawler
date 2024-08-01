@@ -1,6 +1,8 @@
 package stfetch
 
-import "github.com/jackc/pgx/v5/pgtype"
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type company struct {
 	Data []struct {
@@ -63,8 +65,8 @@ type insiderdeals struct {
 		AnDate        string        `json:"anDate"`
 		DealingMethod int           `json:"dealingMethod"`
 		DealingAction string        `json:"dealingAction"`
-		Quantity      pgtype.Float4 `json:"quantity"`
-		Price         pgtype.Float4 `json:"price"`
+		Quantity      float32       `json:"quantity"`
+		Price         float32       `json:"price"`
 		Ratio         pgtype.Float4 `json:"ratio"`
 	} `json:"listInsiderDealing"`
 }
@@ -92,7 +94,7 @@ type events struct {
 	Data []struct {
 		Rsi                pgtype.Float4 `json:"rsi"`
 		Rs                 pgtype.Float4 `json:"rs"`
-		ID                 pgtype.Int4   `json:"id"`
+		ID                 int32         `json:"id"`
 		Ticker             pgtype.Text   `json:"ticker"`
 		Price              pgtype.Int4   `json:"price"`
 		PriceChange        pgtype.Int4   `json:"priceChange"`
@@ -100,10 +102,10 @@ type events struct {
 		PriceChangeRatio1M pgtype.Float4 `json:"priceChangeRatio1M"`
 		EventName          pgtype.Text   `json:"eventName"`
 		EventCode          pgtype.Text   `json:"eventCode"`
-		NotifyDate         pgtype.Text   `json:"notifyDate"`
-		ExerDate           pgtype.Text   `json:"exerDate"`
-		RegFinalDate       pgtype.Text   `json:"regFinalDate"`
-		ExRigthDate        pgtype.Text   `json:"exRigthDate"`
+		NotifyDate         string        `json:"notifyDate"`
+		ExerDate           string        `json:"exerDate"`
+		RegFinalDate       string        `json:"regFinalDate"`
+		ExRigthDate        string        `json:"exRigthDate"`
 		EventDesc          pgtype.Text   `json:"eventDesc"`
 	} `json:"listEventNews"`
 }
