@@ -6,6 +6,7 @@ import (
 	"crawler/stfetch"
 	"crawler/utils"
 	"strconv"
+	"sync"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -13,10 +14,7 @@ import (
 func UpdateOverview(queries *db.Queries) {
 	ctx := context.Background()
 
-	var err error
-	defer utils.LogComplete(err, "overview")
-
-	updateEach(queries, func(company db.Company) {
+	updateEach(queries, "overview", func(company db.Company, c chan<- utils.UpdateError) {
 		overview, fetchErr := stfetch.FetchOverview(company.Ticker)
 		if fetchErr != nil {
 			return
@@ -30,7 +28,7 @@ func UpdateOverview(queries *db.Queries) {
 		utils.LogError(atoiErr)
 		industryIDV2 := pgtype.Int4{Int32: int32(id), Valid: true}
 
-		err = queries.CreateOverview(ctx, db.CreateOverviewParams{
+		err := queries.CreateOverview(ctx, db.CreateOverviewParams{
 			CompanyID:            company.ID,
 			DeltaInMonth:         overview.DeltaInMonth,
 			DeltaInWeek:          overview.DeltaInWeek,
@@ -51,22 +49,23 @@ func UpdateOverview(queries *db.Queries) {
 			ShortName:            overview.ShortName,
 			Website:              overview.Website,
 		})
+
+		if err != nil {
+			c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
+		}
 	})
 }
 
 func UpdateProfile(queries *db.Queries) {
 	ctx := context.Background()
 
-	var err error
-	defer utils.LogComplete(err, "profile")
-
-	updateEach(queries, func(company db.Company) {
+	updateEach(queries, "profile", func(company db.Company, c chan<- utils.UpdateError) {
 		profile, fetchErr := stfetch.FetchProfile(company.Ticker)
 		if fetchErr != nil {
 			return
 		}
 
-		err = queries.CreateProfile(ctx, db.CreateProfileParams{
+		err := queries.CreateProfile(ctx, db.CreateProfileParams{
 			CompanyID:          company.ID,
 			BusinessRisk:       utils.ExtractText(profile.BusinessRisk),
 			BusinessStrategies: utils.ExtractText(profile.BusinessStrategies),
@@ -76,34 +75,47 @@ func UpdateProfile(queries *db.Queries) {
 			Profile:            utils.ExtractText(profile.CompanyProfile),
 			Promise:            utils.ExtractText(profile.CompanyPromise),
 		})
+
+		if err != nil {
+			c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
+		}
 	})
 }
 
 func UpdateShareholders(queries *db.Queries) {
 	ctx := context.Background()
+	var wg sync.WaitGroup
 
-	var err error
-	defer utils.LogComplete(err, "shareholders")
-
-	updateEach(queries, func(company db.Company) {
+	updateEach(queries, "shareholders", func(company db.Company, c chan<- utils.UpdateError) {
 		shareholders, fetchErr := stfetch.FetchShareholders(company.Ticker)
 		if fetchErr != nil {
 			return
 		}
 
 		for _, shareholder := range shareholders.Data {
-			err = queries.CreateShareholder(ctx, db.CreateShareholderParams{
-				No:              shareholder.No,
-				CompanyID:       company.ID,
-				ShareOwnPercent: shareholder.OwnPercent,
-				Shareholder:     shareholder.Name,
-			})
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+
+				err := queries.CreateShareholder(ctx, db.CreateShareholderParams{
+					No:              shareholder.No,
+					CompanyID:       company.ID,
+					ShareOwnPercent: shareholder.OwnPercent,
+					Shareholder:     shareholder.Name,
+				})
+
+				if err != nil {
+					c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
+				}
+			}()
 		}
+		wg.Wait()
 	})
 }
 
 func UpdateInsiderDeals(queries *db.Queries) {
 	ctx := context.Background()
+	var wg sync.WaitGroup
 
 	actions := map[string]string{
 		"0": "Mua",
@@ -115,10 +127,7 @@ func UpdateInsiderDeals(queries *db.Queries) {
 		2: "Cổ đông sáng lập",
 	}
 
-	var err error
-	defer utils.LogComplete(err, "insider deals")
-
-	updateEach(queries, func(company db.Company) {
+	updateEach(queries, "insider deals", func(company db.Company, c chan<- utils.UpdateError) {
 		insiderDeals, fetchErr := stfetch.FetchInsiderDeals(company.Ticker)
 		if fetchErr != nil {
 			return
@@ -131,62 +140,88 @@ func UpdateInsiderDeals(queries *db.Queries) {
 			dealMethod := pgtype.Text{String: methods[insiderDeal.DealingMethod], Valid: true}
 			dealAnnounceDate := pgtype.Timestamptz{Time: utils.FormatTime(insiderDeal.AnDate), Valid: true}
 
-			err = queries.CreateInsiderDeal(ctx, db.CreateInsiderDealParams{
-				CompanyID:        company.ID,
-				DealPrice:        dealPrice,
-				DealQuantity:     dealQuantity,
-				DealRatio:        insiderDeal.Ratio,
-				DealAnnounceDate: dealAnnounceDate,
-				DealAction:       dealAction,
-				DealMethod:       dealMethod,
-			})
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+
+				err := queries.CreateInsiderDeal(ctx, db.CreateInsiderDealParams{
+					CompanyID:        company.ID,
+					DealPrice:        dealPrice,
+					DealQuantity:     dealQuantity,
+					DealRatio:        insiderDeal.Ratio,
+					DealAnnounceDate: dealAnnounceDate,
+					DealAction:       dealAction,
+					DealMethod:       dealMethod,
+				})
+
+				if err != nil {
+					c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
+				}
+			}()
 		}
+		wg.Wait()
 	})
 }
 
 func UpdateSubsidiaries(queries *db.Queries) {
 	ctx := context.Background()
+	var wg sync.WaitGroup
 
-	var err error
-	defer utils.LogComplete(err, "subsidiaries")
-
-	updateEach(queries, func(company db.Company) {
+	updateEach(queries, "subsidiaries", func(company db.Company, c chan<- utils.UpdateError) {
 		subsidiaries, fetchErr := stfetch.FetchSubsidiares(company.Ticker)
 		if fetchErr != nil {
 			return
 		}
 
 		for _, subsidiary := range subsidiaries.Data {
-			err = queries.CreateSubsidiary(ctx, db.CreateSubsidiaryParams{
-				No:         subsidiary.No,
-				CompanyID:  company.ID,
-				OwnPercent: subsidiary.OwnPercent,
-				Name:       subsidiary.CompanyName,
-			})
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+
+				err := queries.CreateSubsidiary(ctx, db.CreateSubsidiaryParams{
+					No:         subsidiary.No,
+					CompanyID:  company.ID,
+					OwnPercent: subsidiary.OwnPercent,
+					Name:       subsidiary.CompanyName,
+				})
+
+				if err != nil {
+					c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
+				}
+			}()
 		}
+		wg.Wait()
 	})
 }
 
 func UpdateOfficers(queries *db.Queries) {
 	ctx := context.Background()
+	var wg sync.WaitGroup
 
-	var err error
-	defer utils.LogComplete(err, "officers")
-
-	updateEach(queries, func(company db.Company) {
+	updateEach(queries, "officers", func(company db.Company, c chan<- utils.UpdateError) {
 		officers, fetchErr := stfetch.FetchOfficers(company.Ticker)
 		if fetchErr != nil {
 			return
 		}
 
 		for _, officer := range officers.Data {
-			err = queries.CreateOfficer(ctx, db.CreateOfficerParams{
-				No:         officer.No,
-				CompanyID:  company.ID,
-				OwnPercent: officer.OwnPercent,
-				Name:       officer.Name,
-				Position:   officer.Position,
-			})
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+
+				err := queries.CreateOfficer(ctx, db.CreateOfficerParams{
+					No:         officer.No,
+					CompanyID:  company.ID,
+					OwnPercent: officer.OwnPercent,
+					Name:       officer.Name,
+					Position:   officer.Position,
+				})
+
+				if err != nil {
+					c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
+				}
+			}()
 		}
+		wg.Wait()
 	})
 }

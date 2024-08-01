@@ -4,7 +4,7 @@ import "github.com/jackc/pgx/v5/pgtype"
 
 type company struct {
 	Data []struct {
-		Ticker      pgtype.Text `json:"code"`
+		Ticker      string      `json:"code"`
 		FullnameVi  pgtype.Text `json:"fullname_vi"`
 		CompanyType pgtype.Int4 `json:"loaidn"`
 		Exchange    pgtype.Text `json:"san"`

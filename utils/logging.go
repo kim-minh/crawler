@@ -5,11 +5,18 @@ import (
 	"net/http"
 )
 
-func LogComplete(err error, dataType string) {
-	if err == nil {
-		log.Printf("Update %s data sucessfully", dataType)
+type UpdateError struct {
+	Ticker string
+	Error  error
+}
+
+func LogComplete(c <-chan UpdateError, dataType string) {
+	if len(c) == 0 {
+		log.Printf("Sucessfully updated %s data ", dataType)
 	} else {
-		log.Printf("Failed to update %s data. Error: %s", dataType, err)
+		for i := range c {
+			log.Printf("Failed to update %s %s. Error: %s", i.Ticker, dataType, i.Error)
+		}
 	}
 }
 

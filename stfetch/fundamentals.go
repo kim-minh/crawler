@@ -32,7 +32,7 @@ func FetchInsiderDeals(ticker string) (insiderdeals, error) {
 }
 
 func FetchSubsidiares(ticker string) (subsidiaries, error) {
-	url := fmt.Sprintf("%s/tcanalysis/v1/company/%s/sub-companies?page=0&size=20", host, ticker)
+	url := fmt.Sprintf("%s/tcanalysis/v1/company/%s/sub-companies?page=0&size=10", host, ticker)
 	data, err := utils.Fetch[subsidiaries](url)
 	return data, err
 }
