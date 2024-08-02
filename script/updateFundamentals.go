@@ -13,8 +13,9 @@ import (
 
 func UpdateOverview(queries *db.Queries) {
 	ctx := context.Background()
+	dataType := "overview"
 
-	updateEach(queries, "overview", func(company db.Company, c chan<- utils.UpdateError) {
+	updateEach(queries, dataType, func(company db.Company) {
 		overview, fetchErr := stfetch.FetchOverview(company.Ticker)
 		if fetchErr != nil {
 			return
@@ -49,17 +50,15 @@ func UpdateOverview(queries *db.Queries) {
 			ShortName:            overview.ShortName,
 			Website:              overview.Website,
 		})
-
-		if err != nil {
-			c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
-		}
+		utils.LogInsertError(company.Ticker, dataType, err)
 	})
 }
 
 func UpdateProfile(queries *db.Queries) {
 	ctx := context.Background()
+	dataType := "profile"
 
-	updateEach(queries, "profile", func(company db.Company, c chan<- utils.UpdateError) {
+	updateEach(queries, dataType, func(company db.Company) {
 		profile, fetchErr := stfetch.FetchProfile(company.Ticker)
 		if fetchErr != nil {
 			return
@@ -75,18 +74,16 @@ func UpdateProfile(queries *db.Queries) {
 			Profile:            utils.ExtractText(profile.CompanyProfile),
 			Promise:            utils.ExtractText(profile.CompanyPromise),
 		})
-
-		if err != nil {
-			c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
-		}
+		utils.LogInsertError(company.Ticker, dataType, err)
 	})
 }
 
 func UpdateShareholders(queries *db.Queries) {
 	ctx := context.Background()
 	var wg sync.WaitGroup
+	dataType := "shareholders"
 
-	updateEach(queries, "shareholders", func(company db.Company, c chan<- utils.UpdateError) {
+	updateEach(queries, dataType, func(company db.Company) {
 		shareholders, fetchErr := stfetch.FetchShareholders(company.Ticker)
 		if fetchErr != nil {
 			return
@@ -103,10 +100,7 @@ func UpdateShareholders(queries *db.Queries) {
 					ShareOwnPercent: shareholder.OwnPercent,
 					Shareholder:     shareholder.Name,
 				})
-
-				if err != nil {
-					c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
-				}
+				utils.LogInsertError(company.Ticker, dataType, err)
 			}()
 		}
 		wg.Wait()
@@ -116,6 +110,7 @@ func UpdateShareholders(queries *db.Queries) {
 func UpdateInsiderDeals(queries *db.Queries) {
 	ctx := context.Background()
 	var wg sync.WaitGroup
+	dataType := "insider deals"
 
 	actions := map[string]string{
 		"0": "Mua",
@@ -127,7 +122,7 @@ func UpdateInsiderDeals(queries *db.Queries) {
 		2: "Cổ đông sáng lập",
 	}
 
-	updateEach(queries, "insider deals", func(company db.Company, c chan<- utils.UpdateError) {
+	updateEach(queries, dataType, func(company db.Company) {
 		insiderDeals, fetchErr := stfetch.FetchInsiderDeals(company.Ticker)
 		if fetchErr != nil {
 			return
@@ -152,10 +147,7 @@ func UpdateInsiderDeals(queries *db.Queries) {
 					DealAction:       dealAction,
 					DealMethod:       dealMethod,
 				})
-
-				if err != nil {
-					c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
-				}
+				utils.LogInsertError(company.Ticker, dataType, err)
 			}()
 		}
 		wg.Wait()
@@ -165,8 +157,9 @@ func UpdateInsiderDeals(queries *db.Queries) {
 func UpdateSubsidiaries(queries *db.Queries) {
 	ctx := context.Background()
 	var wg sync.WaitGroup
+	dataType := "subsidiaries"
 
-	updateEach(queries, "subsidiaries", func(company db.Company, c chan<- utils.UpdateError) {
+	updateEach(queries, dataType, func(company db.Company) {
 		subsidiaries, fetchErr := stfetch.FetchSubsidiares(company.Ticker)
 		if fetchErr != nil {
 			return
@@ -183,10 +176,7 @@ func UpdateSubsidiaries(queries *db.Queries) {
 					OwnPercent: subsidiary.OwnPercent,
 					Name:       subsidiary.CompanyName,
 				})
-
-				if err != nil {
-					c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
-				}
+				utils.LogInsertError(company.Ticker, dataType, err)
 			}()
 		}
 		wg.Wait()
@@ -196,8 +186,9 @@ func UpdateSubsidiaries(queries *db.Queries) {
 func UpdateOfficers(queries *db.Queries) {
 	ctx := context.Background()
 	var wg sync.WaitGroup
+	dataType := "officers"
 
-	updateEach(queries, "officers", func(company db.Company, c chan<- utils.UpdateError) {
+	updateEach(queries, dataType, func(company db.Company) {
 		officers, fetchErr := stfetch.FetchOfficers(company.Ticker)
 		if fetchErr != nil {
 			return
@@ -215,10 +206,7 @@ func UpdateOfficers(queries *db.Queries) {
 					Name:       officer.Name,
 					Position:   officer.Position,
 				})
-
-				if err != nil {
-					c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
-				}
+				utils.LogInsertError(company.Ticker, dataType, err)
 			}()
 		}
 		wg.Wait()
@@ -228,8 +216,9 @@ func UpdateOfficers(queries *db.Queries) {
 func UpdateEvents(queries *db.Queries) {
 	ctx := context.Background()
 	var wg sync.WaitGroup
+	dataType := "events"
 
-	updateEach(queries, "events", func(company db.Company, c chan<- utils.UpdateError) {
+	updateEach(queries, dataType, func(company db.Company) {
 		events, fetchErr := stfetch.FetchEvents(company.Ticker)
 		if fetchErr != nil {
 			return
@@ -257,10 +246,7 @@ func UpdateEvents(queries *db.Queries) {
 					Rsi:                     event.Rsi,
 					Rs:                      event.Rs,
 				})
-
-				if err != nil {
-					c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
-				}
+				utils.LogInsertError(company.Ticker, dataType, err)
 			}()
 		}
 		wg.Wait()

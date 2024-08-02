@@ -5,18 +5,17 @@ import (
 	"crawler/db"
 	"crawler/stfetch"
 	"crawler/utils"
-
 	"sync"
 )
 
 func UpdateCompanies(queries *db.Queries) {
 	ctx := context.Background()
+	dataType := "companies"
 
 	companies, _ := stfetch.FetchCompanies()
 
 	var wg sync.WaitGroup
-	c := make(chan utils.UpdateError)
-	defer utils.LogComplete(c, "companies")
+	defer utils.LogComplete(dataType)
 
 	for _, company := range companies.Data {
 		wg.Add(1)
@@ -27,12 +26,9 @@ func UpdateCompanies(queries *db.Queries) {
 				CompanyType: company.CompanyType,
 				Exchange:    company.Exchange,
 			})
-			if err != nil {
-				c <- utils.UpdateError{Ticker: company.Ticker, Error: err}
-			}
+			utils.LogInsertError(company.Ticker, dataType, err)
 			defer wg.Done()
 		}()
 	}
 	wg.Wait()
-	close(c)
 }

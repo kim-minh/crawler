@@ -35,7 +35,7 @@ func FetchOfficers(ticker string) (officers, error) {
 }
 
 func FetchEvents(ticker string) (events, error) {
-	url := fmt.Sprintf("%s/tcanalysis/v1/ticker/%s/events-news?page=0&size=20", host, ticker)
+	url := fmt.Sprintf("%s/tcanalysis/v1/ticker/%s/events-news?page=0&size=100", host, ticker)
 	return fetch[events](url)
 }
 

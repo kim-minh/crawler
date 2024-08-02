@@ -13,15 +13,14 @@ const (
 	waitTime      = 30 * time.Second
 )
 
-func updateEach(queries *db.Queries, dataType string, update func(company db.Company, c chan<- utils.UpdateError)) {
+func updateEach(queries *db.Queries, dataType string, update func(company db.Company)) {
 	ctx := context.Background()
 
 	companies, err := queries.ListCompanies(ctx)
 	utils.LogFatal(err)
 
 	var wg sync.WaitGroup
-	c := make(chan utils.UpdateError)
-	defer utils.LogComplete(c, dataType)
+	defer utils.LogComplete(dataType)
 
 	totalCompanies := len(companies)
 	for i := 0; i < totalCompanies; {
@@ -39,14 +38,12 @@ func updateEach(queries *db.Queries, dataType string, update func(company db.Com
 
 			wg.Add(1)
 			go func() {
-				update(company, c)
+				update(company)
 				defer wg.Done()
 			}()
 		}
 		i += batchSize
-
-		wg.Wait()
 		time.Sleep(waitTime)
 	}
-	close(c)
+	wg.Wait()
 }
